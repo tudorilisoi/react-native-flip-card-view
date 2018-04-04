@@ -3,6 +3,7 @@ import {
     Animated,
     Easing,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     Text,
     View
 } from "react-native";
@@ -11,7 +12,7 @@ import {screen} from 'src/style'
 
 const styles = {
     animatedFace: {
-        opacity: .5,
+        // opacity: .5,
         position: 'absolute',
         top: 0,
         left: 0,
@@ -41,24 +42,39 @@ class FlipCard extends React.PureComponent {
         this.state.animatedValue.addListener((valueObj) => {
             const flipped = valueObj.value >= 0.5
             this.state.opacityBack.setValue(flipped ? 1 : 0)
-            this.state.opacityFront.setValue(flipped ? 0 : 1)
-            console.log('ANIM', valueObj.value, flipped);
+            this.state.opacityFront.setValue(!flipped ? 1 : 0)
+            // console.log('ANIM', valueObj.value, flipped);
         });
 
     }
 
-    _flipToggleCard = () => {
-        // this.setState({isFlipped: !this.state.isFlipped});
+    componentDidMount() {
+        // this.doFlip()
+        window.flipper = this
+    }
+
+    setFlip = (flipped) => {
+        this.flipped = !this.flipped
+        this.state.animatedValue.setValue(flipped ? 1 : 0)
+    }
+
+    doFlip = () => {
+
         this.flipped = !this.flipped
         Animated.spring(this.state.animatedValue, {
             toValue: this.flipped ? 1 : 0,   // Returns to the start
             velocity: this.props.velocity,  // Velocity makes it move
             tension: this.props.tension, // Slow
             friction: this.props.friction,  // Oscillate a lot
-        }).start()
+        }).start(() => {
+            // console.log('ANIMATION DONE');
+            return true
+        })
     };
 
     render() {
+        console.log('RENDER');
+
         const rotateYFront = this.state.animatedValue.interpolate({
             inputRange: [0, 0.5, 1],
             outputRange: ['0deg', '-90deg', '180deg']
@@ -69,28 +85,50 @@ class FlipCard extends React.PureComponent {
             outputRange: ['180deg', '-90deg', '0deg']
         });
 
+        const zBack = this.state.opacityBack.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 10]
+        });
+
+        const zFront = this.state.opacityFront.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 10]
+        });
+
         const frontFaceStyle = [
             styles.animatedFace,
-            {opacity: this.state.opacityFront, transform: [{rotateY: rotateYFront}]}
+            {
+                zIndex: zFront,
+                // opacity: this.state.opacityFront,
+                transform: [{rotateY: rotateYFront}]
+            }
         ]
         const backFaceStyle = [
             styles.animatedFace,
-            {opacity: this.state.opacityBack, transform: [{rotateY: rotateYBack}]}
+            {
+                zIndex: zBack,
+                // opacity: this.state.opacityBack,
+                transform: [{rotateY: rotateYBack}]
+            }
         ]
 
         return (
-            <TouchableOpacity onPress={this._flipToggleCard} style={[styles.animatedContainer, {zIndex: -1}]}>
-                <Animated.View
-                    useNativeDriver
-                    style={frontFaceStyle}>
-                    {this.flippedCardView(false)}
-                </Animated.View>
+            <View style={styles.animatedContainer}>
+
                 <Animated.View
                     useNativeDriver
                     style={backFaceStyle}>
                     {this.flippedCardView(true)}
                 </Animated.View>
-            </TouchableOpacity>)
+
+                <Animated.View
+                    useNativeDriver
+                    style={frontFaceStyle}>
+                    {this.flippedCardView(false)}
+                </Animated.View>
+
+            </View>
+        )
     }
 
 
