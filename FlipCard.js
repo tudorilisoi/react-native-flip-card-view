@@ -1,12 +1,5 @@
 import React from "react";
-import {
-    Animated,
-    Easing,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    Text,
-    View
-} from "react-native";
+import {Animated, View, Easing} from "react-native";
 
 import {screen} from 'src/style'
 
@@ -64,7 +57,8 @@ class FlipCard extends React.PureComponent {
         this.flipped = !this.flipped
 
         Animated.timing(this.state.animatedValue, {
-            duration: 500,
+            duration: 600,
+            easing: Easing.inOut(Easing.sin),
             toValue: this.flipped ? 1 : 0
         }).start(() => {
             // console.log('ANIMATION DONE');
@@ -99,29 +93,33 @@ class FlipCard extends React.PureComponent {
 
 
         //using negative left position to prevent touches on the hidden face
-        const leftFront = this.state.isFlipped.interpolate({
+        const positionFront = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
             outputRange: [0, -screen.vmax * 100]
         });
 
-        const leftBack = this.state.isFlipped.interpolate({
+        const positionBack = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
             outputRange: [-screen.vmax * 100, 0]
         });
 
         const frontFaceStyle = [
             styles.animatedFace, {
-                left: leftFront,
-                top: leftFront,
-                transform: [{rotateY: rotateYFront}]
+                transform: [
+                    {rotateY: rotateYFront},
+                    {translateX: positionFront},
+                    {translateY: positionFront},
+                ]
             }
         ]
         const backFaceStyle = [
             styles.animatedFace,
             {
-                left: leftBack,
-                top: leftBack,
-                transform: [{rotateY: rotateYBack}]
+                transform: [
+                    {rotateY: rotateYBack},
+                    {translateX: positionBack},
+                    {translateY: positionBack},
+                ]
             }
         ]
 
