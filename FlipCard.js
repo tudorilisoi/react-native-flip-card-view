@@ -54,6 +54,7 @@ class FlipCard extends React.PureComponent {
         this.state.animatedValue.removeAllListeners();
     }
 
+    isFlipped = () => this.flipped
 
     setFlip = (flipped) => {
         this.flipped = !this.flipped
@@ -65,7 +66,7 @@ class FlipCard extends React.PureComponent {
         this.flipped = !this.flipped
 
         Animated.timing(this.state.animatedValue, {
-            duration: 600,
+            duration: 500,
             easing: Easing.inOut(Easing.sin),
             toValue: this.flipped ? 1 : 0
         }).start(() => {
