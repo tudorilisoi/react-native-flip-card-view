@@ -12,17 +12,16 @@ import {screen} from 'src/style'
 
 const styles = {
     animatedFace: {
-        // opacity: .5,
         position: 'absolute',
         top: 0,
         left: 0,
-        width: screen.width,
-        height: screen.height - screen.navh
+        flex: 1,
+        // width: screen.width,
+        // height: screen.height - screen.navh
     },
     animatedContainer: {
-        // flex: 1,
-        top: 0,
-        left: 0,
+        // top: 0,
+        // left: 0,
         width: screen.width,
         height: screen.height - screen.navh
     }
@@ -34,15 +33,12 @@ class FlipCard extends React.PureComponent {
 
         this.state = {
             animatedValue: new Animated.Value(0),
-            opacityFront: new Animated.Value(1),
-            opacityBack: new Animated.Value(0),
-            isFlipped: true,
+            isFlipped: new Animated.Value(0),
         }
 
         this.state.animatedValue.addListener((valueObj) => {
             const flipped = valueObj.value >= 0.5
-            this.state.opacityBack.setValue(flipped ? 1 : 0)
-            this.state.opacityFront.setValue(!flipped ? 1 : 0)
+            this.state.isFlipped.setValue(flipped ? 1 : 0)
             // console.log('ANIM', valueObj.value, flipped);
         });
 
@@ -53,6 +49,11 @@ class FlipCard extends React.PureComponent {
         window.flipper = this
     }
 
+    componentWillUnmount() {
+        this.state.animatedValue.removeAllListeners();
+    }
+
+
     setFlip = (flipped) => {
         this.flipped = !this.flipped
         this.state.animatedValue.setValue(flipped ? 1 : 0)
@@ -61,6 +62,16 @@ class FlipCard extends React.PureComponent {
     doFlip = () => {
 
         this.flipped = !this.flipped
+
+        Animated.timing(this.state.animatedValue, {
+            duration: 500,
+            toValue: this.flipped ? 1 : 0
+        }).start(() => {
+            // console.log('ANIMATION DONE');
+            return true
+        })
+
+        /*
         Animated.spring(this.state.animatedValue, {
             toValue: this.flipped ? 1 : 0,   // Returns to the start
             velocity: this.props.velocity,  // Velocity makes it move
@@ -70,6 +81,7 @@ class FlipCard extends React.PureComponent {
             // console.log('ANIMATION DONE');
             return true
         })
+        */
     };
 
     render() {
@@ -82,32 +94,33 @@ class FlipCard extends React.PureComponent {
 
         const rotateYBack = this.state.animatedValue.interpolate({
             inputRange: [0, 0.5, 1],
-            outputRange: ['180deg', '-90deg', '0deg']
+            outputRange: ['180deg', '90deg', '0deg']
         });
 
-        const zBack = this.state.opacityBack.interpolate({
+
+        //using negative left position to prevent touches on the hidden face
+        const leftFront = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 10]
+            outputRange: [0, -screen.vmax * 100]
         });
 
-        const zFront = this.state.opacityFront.interpolate({
+        const leftBack = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 10]
+            outputRange: [-screen.vmax * 100, 0]
         });
 
         const frontFaceStyle = [
-            styles.animatedFace,
-            {
-                zIndex: zFront,
-                // opacity: this.state.opacityFront,
+            styles.animatedFace, {
+                left: leftFront,
+                top: leftFront,
                 transform: [{rotateY: rotateYFront}]
             }
         ]
         const backFaceStyle = [
             styles.animatedFace,
             {
-                zIndex: zBack,
-                // opacity: this.state.opacityBack,
+                left: leftBack,
+                top: leftBack,
                 transform: [{rotateY: rotateYBack}]
             }
         ]
