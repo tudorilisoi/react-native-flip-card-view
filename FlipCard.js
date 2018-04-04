@@ -1,26 +1,34 @@
 import React from "react";
 import {Animated, View, Easing} from "react-native";
-
+import PropTypes from 'prop-types';
 import {screen} from 'src/style'
 
-const styles = {
-    animatedFace: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        flex: 1,
-        // width: screen.width,
-        // height: screen.height - screen.navh
-    },
-    animatedContainer: {
-        // top: 0,
-        // left: 0,
-        width: screen.width,
-        height: screen.height - screen.navh
+const computeStyles = (containerSize) => {
+    return {
+        animatedFace: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            flex: 1,
+        },
+        animatedContainer: {
+            width: containerSize.width,
+            height: containerSize.height
+        }
     }
-};
+}
 
 class FlipCard extends React.PureComponent {
+
+    static propTypes = {
+        containerSize: PropTypes.object.isRequired, //{width,height}
+        style: PropTypes.any,
+    }
+
+    static defaultProps = {
+        style: null,
+    }
+
     constructor() {
         super();
 
@@ -80,6 +88,7 @@ class FlipCard extends React.PureComponent {
 
     render() {
         console.log('RENDER');
+        const styles = computeStyles(this.props.containerSize)
 
         const rotateYFront = this.state.animatedValue.interpolate({
             inputRange: [0, 0.5, 1],
@@ -107,8 +116,8 @@ class FlipCard extends React.PureComponent {
             styles.animatedFace, {
                 transform: [
                     {rotateY: rotateYFront},
-                    {translateX: positionFront},
                     {translateY: positionFront},
+                    // {translateX: positionFront},
                 ]
             }
         ]
@@ -117,14 +126,14 @@ class FlipCard extends React.PureComponent {
             {
                 transform: [
                     {rotateY: rotateYBack},
-                    {translateX: positionBack},
                     {translateY: positionBack},
+                    // {translateX: positionBack},
                 ]
             }
         ]
 
         return (
-            <View style={styles.animatedContainer}>
+            <View style={[styles.animatedContainer, this.props.style]}>
 
                 <Animated.View
                     useNativeDriver
