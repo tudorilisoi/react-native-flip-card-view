@@ -61,25 +61,14 @@ class FlipCard extends React.PureComponent {
         this.flipped = !this.flipped
 
         Animated.timing(this.state.animatedValue, {
-            duration: 500,
+            useNativeDriver: true,
+            duration: 600,
             easing: Easing.inOut(Easing.sin),
             toValue: this.flipped ? 1 : 0
         }).start(() => {
             // console.log('ANIMATION DONE');
             return true
         })
-
-        /*
-        Animated.spring(this.state.animatedValue, {
-            toValue: this.flipped ? 1 : 0,   // Returns to the start
-            velocity: this.props.velocity,  // Velocity makes it move
-            tension: this.props.tension, // Slow
-            friction: this.props.friction,  // Oscillate a lot
-        }).start(() => {
-            // console.log('ANIMATION DONE');
-            return true
-        })
-        */
     };
 
     render() {
@@ -100,17 +89,18 @@ class FlipCard extends React.PureComponent {
         //using negative left position to prevent touches on the hidden face
         const positionFront = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -screen.vmax * 100]
+            outputRange: [0, -screen.vmax * 150]
         });
 
         const positionBack = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
-            outputRange: [-screen.vmax * 100, 0]
+            outputRange: [-screen.vmax * 150, 0]
         });
 
         const frontFaceStyle = [
             styles.animatedFace, {
                 transform: [
+                    {perspective: 1000},
                     {rotateY: rotateYFront},
                     {translateY: positionFront},
                     // {translateX: positionFront},
@@ -121,6 +111,7 @@ class FlipCard extends React.PureComponent {
             styles.animatedFace,
             {
                 transform: [
+                    {perspective: 1000},
                     {rotateY: rotateYBack},
                     {translateY: positionBack},
                     // {translateX: positionBack},
