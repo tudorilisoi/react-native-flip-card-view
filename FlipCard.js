@@ -41,10 +41,20 @@ class FlipCard extends React.PureComponent {
             isFlipped: new Animated.Value(0),
         }
 
+        //using negative left position to prevent touches on the hidden face
+
+        this.state.frontPosition = Animated.multiply(this.state.isFlipped, -300 * screen.vmax)
+        this.state.backPosition = Animated.multiply(Animated.add(this.state.isFlipped, -1), 300 * screen.vmax)
+
+
+        this.lastFlip = false
         this.state.animatedValue.addListener((valueObj) => {
             const flipped = valueObj.value >= 0.5
-            this.state.isFlipped.setValue(flipped ? 1 : 0)
-            // console.log('ANIM', valueObj.value, flipped);
+            const lastFlip = this.lastFlip
+            this.lastFlip = flipped
+            if (lastFlip !== flipped) {
+                this.state.isFlipped.setValue(flipped ? 1 : 0)
+            }
         });
 
     }
@@ -66,7 +76,7 @@ class FlipCard extends React.PureComponent {
 
         Animated.timing(this.state.animatedValue, {
             useNativeDriver: true,
-            duration: 600,
+            duration: 4000,
             easing: Easing.inOut(Easing.sin),
             toValue: this.flipped ? 1 : 0
         }).start(() => {
@@ -89,27 +99,13 @@ class FlipCard extends React.PureComponent {
             outputRange: ['180deg', '90deg', '0deg']
         });
 
-
-        //using negative left position to prevent touches on the hidden face
-        const positionFront = this.state.isFlipped.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -screen.vmax * 150],
-            extrapolate: 'clamp',
-        });
-
-        const positionBack = this.state.isFlipped.interpolate({
-            inputRange: [0, 1],
-            outputRange: [-screen.vmax * 150, 0],
-            extrapolate: 'clamp',
-        });
-
         const frontFaceStyle = [
             styles.animatedFace, {
                 transform: [
                     {perspective: 1000},
                     {rotateY: rotateYFront},
-                    {translateY: positionFront},
-                    // {translateX: positionFront},
+                    {translateY: this.state.frontPosition},
+                    // {translateX: this.state.frontPosition},
                 ]
             }
         ]
@@ -119,8 +115,8 @@ class FlipCard extends React.PureComponent {
                 transform: [
                     {perspective: 1000},
                     {rotateY: rotateYBack},
-                    {translateY: positionBack},
-                    // {translateX: positionBack},
+                    {translateY: this.state.backPosition},
+                    // {translateX: this.state.backPosition},
                 ]
             }
         ]
