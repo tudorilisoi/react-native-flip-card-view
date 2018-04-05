@@ -9,9 +9,13 @@ const computeStyles = (containerSize) => {
             position: 'absolute',
             top: 0,
             left: 0,
-            flex: 1,
+            // flex: 1,
+            width: containerSize.width,
+            height: containerSize.height,
+            overflow: 'hidden',
         },
         animatedContainer: {
+            overflow: 'hidden',
             width: containerSize.width,
             height: containerSize.height
         }
@@ -89,12 +93,14 @@ class FlipCard extends React.PureComponent {
         //using negative left position to prevent touches on the hidden face
         const positionFront = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -screen.vmax * 150]
+            outputRange: [0, -screen.vmax * 150],
+            extrapolate: 'clamp',
         });
 
         const positionBack = this.state.isFlipped.interpolate({
             inputRange: [0, 1],
-            outputRange: [-screen.vmax * 150, 0]
+            outputRange: [-screen.vmax * 150, 0],
+            extrapolate: 'clamp',
         });
 
         const frontFaceStyle = [
@@ -120,15 +126,24 @@ class FlipCard extends React.PureComponent {
         ]
 
         return (
-            <View style={[styles.animatedContainer, this.props.style]}>
+
+            //NOTE renderToHardwareTextureAndroid enables great anim perf
+            //if memory problems/GPU problems, enable before animating and disable afterwards
+
+            <View
+                style={[styles.animatedContainer, this.props.style]}>
 
                 <Animated.View
+                    renderToHardwareTextureAndroid={true}
+                    shouldRasterizeIOS={true}
                     useNativeDriver
                     style={backFaceStyle}>
                     {this.flippedCardView(true)}
                 </Animated.View>
 
                 <Animated.View
+                    renderToHardwareTextureAndroid={true}
+                    shouldRasterizeIOS={true}
                     useNativeDriver
                     style={frontFaceStyle}>
                     {this.flippedCardView(false)}
