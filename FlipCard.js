@@ -45,11 +45,6 @@ class FlipCard extends React.PureComponent {
 
     }
 
-    componentDidMount() {
-        // this.doFlip()
-        window.flipper = this
-    }
-
     componentWillUnmount() {
         this.state.animatedValue.removeAllListeners();
     }
