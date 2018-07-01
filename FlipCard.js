@@ -76,7 +76,7 @@ class FlipCard extends React.PureComponent {
 
         Animated.timing(this.state.animatedValue, {
             useNativeDriver: true,
-            duration: 400,
+            duration: 200,
             easing: Easing.inOut(Easing.sin),
             toValue: this.flipped ? 1 : 0
         }).start(() => {
