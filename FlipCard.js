@@ -27,18 +27,21 @@ class FlipCard extends React.PureComponent {
     static propTypes = {
         containerSize: PropTypes.object.isRequired, //{width,height}
         style: PropTypes.any,
+        flipped: PropTypes.bool
     }
 
     static defaultProps = {
         style: null,
+        initiallyFlipped: false,
     }
 
-    constructor() {
-        super();
-
+    constructor(props) {
+        super(props);
+        const initial = props.flipped ? 1 : 0
+        this.flipped = initial
         this.state = {
-            animatedValue: new Animated.Value(0),
-            isFlipped: new Animated.Value(0),
+            animatedValue: new Animated.Value(initial),
+            isFlipped: new Animated.Value(initial),
         }
 
         //using negative left position to prevent touches on the hidden face
@@ -57,6 +60,12 @@ class FlipCard extends React.PureComponent {
             }
         });
 
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.flipped !== this.props.flipped) {
+            this.doFlip()
+        }
     }
 
     componentWillUnmount() {
@@ -86,7 +95,7 @@ class FlipCard extends React.PureComponent {
     };
 
     render() {
-        console.log('RENDER');
+        console.log('RENDER FLIP');
         const styles = computeStyles(this.props.containerSize)
 
         const rotateYFront = this.state.animatedValue.interpolate({
